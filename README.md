@@ -1,0 +1,1 @@
+# projeto_nano_reack_leitura
