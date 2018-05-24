@@ -18,3 +18,11 @@ export const getCategorias = () =>
 export const getPostagens = () =>
     fetch(`${api}/posts`, {headers})
             .then(res => res.json())
+
+export const getComentariosDaPostagem = (idPostagem) =>
+    fetch(`${api}/posts/${idPostagem}/comments`, {headers})
+            .then(res => res.json())
+
+export const getPostagemPorId = (idPostagem) =>
+    fetch(`${api}/posts/${idPostagem}`, {headers})
+            .then(res => res.json())
