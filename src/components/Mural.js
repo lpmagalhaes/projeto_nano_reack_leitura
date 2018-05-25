@@ -5,8 +5,21 @@ import {Link} from 'react-router-dom';
 import {Alert, Button} from 'reactstrap';
 
 class Mural extends Component {
+    state = {
+        categoriaSelecionada: null
+    }
+    selecionarCategoria(categoria) {
+        this.setState({categoriaSelecionada: categoria});
+    }
     render() {
         const {categorias, postagens} = this.props;
+        const {categoriaSelecionada} = this.state;
+        let postagemParaMostrar = postagens;
+        if(categoriaSelecionada){
+            postagemParaMostrar = postagemParaMostrar
+                    .filter(postagem => (postagem.category === categoriaSelecionada));
+        }
+        
         return (<div>
             <Alert color="primary">
                 Mural
@@ -17,15 +30,32 @@ class Mural extends Component {
                 </Link>
             </Alert>        
             <Alert color="info">
-                Categorias &nbsp;
-                {categorias.map(categoria => (<Categoria key={categoria.name} categoria={categoria} />))}
+                Filtro &nbsp;
+                {categorias.map(categoria => {
+                    let corBotao = 'default';
+                    if(categoria.name === categoriaSelecionada){
+                        corBotao = 'success';
+                    }
+                    return <Button 
+                        color={corBotao}
+                        onClick={() => (this.selecionarCategoria(categoria.name))} 
+                        key={categoria.name}
+                        style={{'marginLeft': '5px'}}>
+                        {categoria.name}
+                    </Button>})}
+                    <Button 
+                        color='default'
+                        onClick={() => (this.selecionarCategoria(null))} 
+                        style={{'marginLeft': '5px'}}>
+                        Limpar Filtro
+                    </Button>
             </Alert>
             <Alert>Postagens</Alert>
-                {postagens.filter(postagem => (postagem.deleted === false))
-                    .map(postagem => (<Postagem key={postagem.id} postagem={postagem} />))}
-                                        
+            {postagemParaMostrar.filter(postagem => (postagem.deleted === false))
+                                        .map(postagem => (<Postagem key={postagem.id} postagem={postagem} />))}
+        
         </div>);
+            }
         }
-    }
 
-    export default Mural;
+        export default Mural;

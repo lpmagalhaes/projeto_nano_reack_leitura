@@ -1,3 +1,5 @@
+import * as ReadableApi from '../utils/ReadableApi';
+
 export const PEGAR_CATEGORIAS_INICIAIS = 'PEGAR_CATEGORIAS_INICIAIS';
 export const PEGAR_POSTAGENS_INICIAIS = 'PEGAR_POSTAGENS_INICIAIS';
 export const PEGAR_COMENTARIOS_INICIAIS = 'PEGAR_COMENTARIOS_INICIAIS';
@@ -23,6 +25,28 @@ export function pegarComentariosIniciais(comentarios) {
         comentarios
     }
 }
+
+export const buscarCategorias = () => dispatch => (
+                ReadableApi.getCategorias()
+                .then(categoriasNaAPI => dispatch(pegarCategoriasIniciais(categoriasNaAPI)))
+                );
+
+export const buscarPostagens = () => dispatch => (
+                ReadableApi.getPostagens()
+                .then(postagensNaAPI => dispatch(pegarPostagensIniciais(postagensNaAPI)))
+                );
+
+export const buscarComentarios = () => dispatch => (
+                ReadableApi.getPostagens()
+                .then(postagensNaAPI =>
+                    postagensNaAPI.map(postagem =>
+                        ReadableApi.getComentariosDaPostagem(postagem.id)
+                                .then(comentarios => dispatch(pegarComentariosIniciais(comentarios)))
+                    )
+                )
+                );
+
+
 
 export function selecionarPostagem(postagem) {
     return {

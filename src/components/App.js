@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
-import * as ReadableApi from '../utils/ReadableApi';
 import {connect} from 'react-redux';
-import {pegarPostagensIniciais, 
-    pegarCategoriasIniciais,
-pegarComentariosIniciais} from '../actions';
+import {buscarComentarios,
+buscarPostagens,
+buscarCategorias} from '../actions';
 import {Route, withRouter} from 'react-router-dom';
 import Mural from './Mural'; 
 import NovaPostagem from './NovaPostagem'; 
@@ -11,18 +10,10 @@ import DetalhePostagem from './DetalhePostagem';
 
 class App extends Component {
     componentDidMount() {
-        const {pegarPostagensIniciais, pegarCategoriasIniciais,pegarComentariosIniciais} = this.props;
-        ReadableApi.getCategorias()
-                .then(categoriasNaAPI => pegarCategoriasIniciais(categoriasNaAPI));
-        ReadableApi.getPostagens()
-                .then(postagensNaAPI => pegarPostagensIniciais(postagensNaAPI)); 
-        ReadableApi.getPostagens()
-                .then(postagensNaAPI => 
-                   postagensNaAPI.map(postagem => 
-                        ReadableApi.getComentariosDaPostagem(postagem.id)
-                                    .then(comentarios => pegarComentariosIniciais(comentarios)) 
-                   )                   
-        );
+        const {buscarCategorias,buscarPostagens, buscarComentarios} = this.props;
+        buscarCategorias();
+        buscarPostagens();
+        buscarComentarios();        
     }
     render() {
         const {categorias, postagens} = this.props;
@@ -44,9 +35,9 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        pegarCategoriasIniciais: (data) => dispatch(pegarCategoriasIniciais(data)),
-        pegarPostagensIniciais: (data) => dispatch(pegarPostagensIniciais(data)),
-        pegarComentariosIniciais: (data) => dispatch(pegarComentariosIniciais(data)),
+        buscarCategorias: () => dispatch(buscarCategorias()),
+        buscarPostagens: () => dispatch(buscarPostagens()),
+        buscarComentarios: () => dispatch(buscarComentarios()),
     }
 }
 

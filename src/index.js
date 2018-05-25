@@ -6,6 +6,7 @@ import registerServiceWorker from './registerServiceWorker';
 import {createStore, applyMiddleware} from 'redux';
 import reducer from './reducers';
 import {Provider} from 'react-redux';
+import thunk from 'redux-thunk';
 import 'bootstrap/dist/css/bootstrap.css';
 
 const logger = store => next => action => {
@@ -16,8 +17,8 @@ const logger = store => next => action => {
             console.groupEnd(action.type);
             return resultado;
         };
-        
-const store = createStore(reducer, applyMiddleware(logger));
+
+const store = createStore(reducer, applyMiddleware(logger, thunk));
 
 ReactDOM.render(
         <Provider store={store}>
@@ -26,5 +27,5 @@ ReactDOM.render(
             </BrowserRouter>
         </Provider>
         , document.getElementById('root'));
-        
+
 registerServiceWorker();

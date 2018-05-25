@@ -12,17 +12,17 @@ class DetalhePostagem extends Component {
         const {postagemSelecionada, selecionarPostagem, location} = this.props;
         if (postagemSelecionada === null) {
             ReadableApi.getPostagemPorId(location.pathname.split('/')[2])
-                    .then(postagem => {
-                        if (!postagem.deleted) {
-                            selecionarPostagem(postagem)
-                        }
-                        return postagem;
-                    })
-                    .then(postagem => (
-                                ReadableApi.getComentariosDaPostagem(postagem.id)
-                                .then(comentarios => this.setState({comentariosParaMostrar: comentarios}))
-                                )
-                    );
+                .then(postagem => {
+                    if (!postagem.deleted) {
+                        selecionarPostagem(postagem)
+                    }
+                    return postagem;
+                })
+                .then(postagem => (
+                            ReadableApi.getComentariosDaPostagem(postagem.id)
+                            .then(comentarios => this.setState({comentariosParaMostrar: comentarios}))
+                            )
+                );
         }
 
     }
@@ -47,10 +47,10 @@ class DetalhePostagem extends Component {
             </Link>
             {postagemSelecionada ? <Postagem postagem={postagemSelecionada} /> : <Alert color="danger">Postagem Apagada</Alert>}
             {comentariosParaMostrar &&
-                                    comentariosParaMostrar
-                                    .filter(comentario => (comentario.parentId === postagemSelecionada.id))
-                                    .filter(comentario => (comentario.deleted === false))
-                                    .map(comentario => (<Comentario key={comentario.id} comentario={comentario} />))}
+                comentariosParaMostrar
+                .filter(comentario => (comentario.parentId === postagemSelecionada.id))
+                .filter(comentario => (comentario.deleted === false))
+                .map(comentario => (<Comentario key={comentario.id} comentario={comentario} />))}
         </div>);
         }
     }
