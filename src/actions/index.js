@@ -5,6 +5,7 @@ export const PEGAR_POSTAGENS_INICIAIS = 'PEGAR_POSTAGENS_INICIAIS';
 export const PEGAR_COMENTARIOS_INICIAIS = 'PEGAR_COMENTARIOS_INICIAIS';
 export const SELECIONAR_POSTAGEM = 'SELECIONAR_POSTAGEM';
 export const REMOVER_POSTAGEM = 'REMOVER_POSTAGEM';
+export const ADICIONAR_POSTAGEM = 'ADICIONAR_POSTAGEM';
 
 export function pegarCategoriasIniciais(categorias) {
     return {
@@ -62,4 +63,21 @@ export function removerPostagem(postagem) {
         postagem
     }
 }
+
+export function adicionarPostagem(postagem) {
+    return {
+        type: ADICIONAR_POSTAGEM,
+        postagem
+    }
+}
+
+export const salvarPostagem = (postagem) => dispatch => (
+    ReadableApi.postPostagem(postagem)
+        .then(postagemNova => dispatch(adicionarPostagem(postagemNova)))
+);
+
+export const inativarPostagem = (postagem) => dispatch => (
+    ReadableApi.removerPostagem(postagem.id)
+        .then(postagem => dispatch(removerPostagem(postagem)))
+);
 

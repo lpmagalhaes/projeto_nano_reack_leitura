@@ -16,16 +16,16 @@ class NovaPostagem extends Component {
                 <h1>Nova Postagem</h1>
                 <form onSubmit={this.auxiliarDeSubmiti} className='create-contact-form'>
                     <div className='create-contact-details'>
-                        <input type='text' name='titulo' placeholder='Titulo'/>
-                        <input type='text' name='corpo' placeholder='Corpo'/>
-                        <input type='text' name='author' placeholder='Autor'/>
-                        Categoria
-                        <select type='text' name='author'>
-                            <option value="0">Selecione</option>
-                            {categorias.map(categoria => (
-                                    <option key={categoria.path}>{categoria.name}</option>))}
-                        </select>
-                        <button>Salvar Postagem</button>
+                        <p><input type='text' name='title' placeholder='Titulo'/></p>
+                        <p><input type='text' name='body' placeholder='Corpo'/></p>
+                        <p><input type='text' name='author' placeholder='Autor'/></p>
+                        <p>Categoria</p>
+                        <p><select type='text' name='category'>
+                                <option value="0">Selecione</option>
+                                {categorias.map(categoria => (
+                                        <option key={categoria.path}>{categoria.name}</option>))}
+                            </select></p>
+                        <p><button>Salvar Postagem</button></p>
                     </div>
                 </form>
                 </div>);

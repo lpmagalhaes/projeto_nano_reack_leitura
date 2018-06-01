@@ -23,6 +23,17 @@ export const getComentariosDaPostagem = (idPostagem) =>
     fetch(`${api}/posts/${idPostagem}/comments`, {headers})
             .then(res => res.json())
 
-export const getPostagemPorId = (idPostagem) =>
-    fetch(`${api}/posts/${idPostagem}`, {headers})
+export const postPostagem = (postagem) =>
+    fetch(`${api}/posts`, 
+    {
+        headers:{
+                ...headers,
+                'Content-Type': 'application/json'
+    }, 
+    method:"POST", 
+    body: JSON.stringify(postagem)})
+            .then(res => res.json())
+
+export const removerPostagem = (idPostagem) =>
+    fetch(`${api}/posts/${idPostagem}`, {headers,method:"DELETE"})
             .then(res => res.json())

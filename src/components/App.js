@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {connect} from 'react-redux';
-import {buscarComentarios, buscarPostagens, buscarCategorias,
-    selecionarPostagem, removerPostagem} from '../actions';
+import {buscarPostagens, buscarCategorias,
+    selecionarPostagem, removerPostagem, salvarPostagem, inativarPostagem} from '../actions';
 import {Alert, Button} from 'reactstrap';
 import Postagem from './Postagem';
 import Comentario from './Comentario';
@@ -21,7 +21,7 @@ class App extends Component {
         modalPostagemAberto: false,
     }    
     componentDidMount() {
-        const {buscarCategorias, buscarPostagens, buscarComentarios} = this.props;
+        const {buscarCategorias, buscarPostagens, buscarComentarios, salvarPostagem} = this.props;
         buscarCategorias().then(resultado => this.setState({categorias: resultado.categorias}));
         buscarPostagens().then(resultado => this.setState({postagens: resultado.postagens}));        
     }    
@@ -40,6 +40,7 @@ class App extends Component {
         const {removerPostagem} = this.props;
         removerPostagem(postagem);
         this.setState({postagemSelecionada: null});
+        this.props.inativarPostagem(postagem);
     }
     fecharModalDetalhe() {      
         this.setState({modalDetalheAberto: false});
@@ -50,9 +51,22 @@ class App extends Component {
     fecharModalPostagem() {      
         this.setState({modalPostagemAberto: false});
     }
+    aoCriarPostagem(postagemParcial) {
+        postagemParcial.id = Date.now();
+        postagemParcial.timestamp = Date.now();
+        postagemParcial.voteScore = 1;
+        postagemParcial.deleted = false;
+        postagemParcial.commentCount = 0;
+        const {postagens} = this.state;
+        postagens.push(postagemParcial)
+        this.setState({postagens});
+        this.props.salvarPostagem(postagemParcial)        
+        this.fecharModalPostagem();
+    }
     render() {
         const {categorias, postagens, comentarios, categoriaSelecionada, 
             ordenacao, postagemSelecionada, modalDetalheAberto, modalPostagemAberto} = this.state;
+        console.log('state',this.state);
         const corDefault = 'default';
         const corSuccess = 'success';
         const ordenacaoVotos = 'votos';
@@ -152,7 +166,7 @@ class App extends Component {
             <Modal isOpen={modalPostagemAberto}>
                 <div>
                     <Button onClick={()=>{this.fecharModalPostagem()}}>Fechar</Button>
-                    <NovaPostagem />
+                    <NovaPostagem aoCriarPostagem={postagemParcial => this.aoCriarPostagem(postagemParcial)} />
                 </div>
             </Modal>
         </div>);
@@ -168,9 +182,10 @@ function mapDispatchToProps(dispatch) {
     return {
         buscarCategorias: () => dispatch(buscarCategorias()),
         buscarPostagens: () => dispatch(buscarPostagens()),
-        buscarComentarios: () => dispatch(buscarComentarios()),
         selecionarPostagem: (data) => dispatch(selecionarPostagem(data)),
         removerPostagem: (data) => dispatch(removerPostagem(data)),
+        salvarPostagem: (data) => dispatch(salvarPostagem(data)),
+        inativarPostagem: (data) => dispatch(inativarPostagem(data)),
     };
 }
 

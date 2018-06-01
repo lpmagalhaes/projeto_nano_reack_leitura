@@ -3,7 +3,8 @@ PEGAR_CATEGORIAS_INICIAIS,
         PEGAR_POSTAGENS_INICIAIS,
         PEGAR_COMENTARIOS_INICIAIS,
         SELECIONAR_POSTAGEM,
-        REMOVER_POSTAGEM
+        REMOVER_POSTAGEM,
+        ADICIONAR_POSTAGEM
 } from '../actions';
 
 const estadoInicial = {
@@ -42,6 +43,10 @@ function mural(state = estadoInicial, action) {
                         return postagem;
                     });
             return estadoAtualizadoRemovendo;
+        case ADICIONAR_POSTAGEM:
+            const estadoAtualizadoPostagem = state;
+            estadoAtualizadoPostagem.postagens.push(...action.postagem);
+            return estadoAtualizadoPostagem;
         default:
             return state;
     }
