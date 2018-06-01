@@ -1,47 +1,44 @@
 import React, { Component } from 'react';
-import {Jumbotron, Button} from 'reactstrap';
-import {Link} from 'react-router-dom';
-import {connect} from 'react-redux';
-import {selecionarPostagem} from '../actions';
+import {Jumbotron, Button, Alert} from 'reactstrap';
+import {converterTimestamp} from '../utils/helper';
 
 class Postagem extends Component {
     render() {
-        const {postagem, selecionarPostagem} = this.props;
-        const data = this.converterTimestamp(postagem.timestamp);
+        const {postagem, selecionarPostagem, removerPostagem} = this.props;
+        let data = null;
+        if(postagem){
+            data = converterTimestamp(postagem.timestamp);
+        }
         return (<div>
-            <Jumbotron>               
+            {postagem ?
+            <Jumbotron>                
                 <h1 className="display-6">{postagem.title}</h1>
                 <p className="lead">{postagem.body}</p>
                 <hr className="my-2" />
-                <p className="lead">{data} - Author: {postagem.author}</p> 
-                <p>
-                    <Link to={`/detalhe/${postagem.id}`}>
-                    <Button onClick={() => selecionarPostagem(postagem)}>Detalhes da Postagem</Button> 
-                    </Link>
-                </p>  
+                <p className="lead">{data} - Author: {postagem.author}</p>                
+                {selecionarPostagem &&    
+                    <p>
+                        <Button onClick={() => selecionarPostagem(postagem)}>Detalhes da Postagem</Button>                         
+                    </p>              
+                }
                 <p>
                     <Button>Comentários {postagem.commentCount}</Button>&nbsp;
-                    <Link to={postagem.category}><Button>#{postagem.category}</Button></Link>       
+                    <Button>#{postagem.category}</Button>     
                 </p>
                 <p>
                     Score: {postagem.voteScore}&nbsp;
                     <Button color='success'>Plus</Button>&nbsp;
                     <Button color='danger'>Minus</Button>         
-                </p>     
-            </Jumbotron>        
+                </p>
+                {removerPostagem &&  
+                    <p>        
+                        <Button onClick={() => {removerPostagem()}} color='danger'>Remover Postagem</Button>         
+                    </p>
+                }
+            </Jumbotron> : <Alert color="danger">Postagem Apagada</Alert>}        
         </div>);
     }
 
-    converterTimestamp(valor) {
-        const data = new Date(valor);
-        return `${data.getDate()}/${data.getMonth()}/${data.getFullYear()}-${data.getHours()}:${data.getMinutes()}:${data.getSeconds()}`;
-    }
 }
 
-function mapDispatchToProps(dispatch) {
-    return {
-        selecionarPostagem: (data) => dispatch(selecionarPostagem(data)),
-    }
-}
-
-export default connect(null, mapDispatchToProps)(Postagem);
+export default Postagem;

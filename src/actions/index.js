@@ -4,6 +4,7 @@ export const PEGAR_CATEGORIAS_INICIAIS = 'PEGAR_CATEGORIAS_INICIAIS';
 export const PEGAR_POSTAGENS_INICIAIS = 'PEGAR_POSTAGENS_INICIAIS';
 export const PEGAR_COMENTARIOS_INICIAIS = 'PEGAR_COMENTARIOS_INICIAIS';
 export const SELECIONAR_POSTAGEM = 'SELECIONAR_POSTAGEM';
+export const REMOVER_POSTAGEM = 'REMOVER_POSTAGEM';
 
 export function pegarCategoriasIniciais(categorias) {
     return {
@@ -27,30 +28,37 @@ export function pegarComentariosIniciais(comentarios) {
 }
 
 export const buscarCategorias = () => dispatch => (
-                ReadableApi.getCategorias()
-                .then(categoriasNaAPI => dispatch(pegarCategoriasIniciais(categoriasNaAPI)))
-                );
+    ReadableApi.getCategorias()
+        .then(categoriasNaAPI => dispatch(pegarCategoriasIniciais(categoriasNaAPI)))
+);
 
 export const buscarPostagens = () => dispatch => (
-                ReadableApi.getPostagens()
-                .then(postagensNaAPI => dispatch(pegarPostagensIniciais(postagensNaAPI)))
-                );
+    ReadableApi.getPostagens()
+        .then(postagensNaAPI => dispatch(pegarPostagensIniciais(postagensNaAPI)))
+);
 
 export const buscarComentarios = () => dispatch => (
-                ReadableApi.getPostagens()
-                .then(postagensNaAPI =>
-                    postagensNaAPI.map(postagem =>
-                        ReadableApi.getComentariosDaPostagem(postagem.id)
-                                .then(comentarios => dispatch(pegarComentariosIniciais(comentarios)))
-                    )
-                )
-                );
+    ReadableApi.getPostagens()
+    .then(postagensNaAPI =>
+        postagensNaAPI.map(postagem =>
+            ReadableApi.getComentariosDaPostagem(postagem.id)
+                    .then(comentarios => dispatch(pegarComentariosIniciais(comentarios)))
+        )
+    )
+);
 
 
 
 export function selecionarPostagem(postagem) {
     return {
         type: SELECIONAR_POSTAGEM,
+        postagem
+    }
+}
+
+export function removerPostagem(postagem) {
+    return {
+        type: REMOVER_POSTAGEM,
         postagem
     }
 }

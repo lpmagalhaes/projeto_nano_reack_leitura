@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import {Jumbotron, Button} from 'reactstrap';
+import {converterTimestamp} from '../utils/helper';
 
 class Comentario extends Component {
     render() {
         const {comentario} = this.props;
-        const data = this.converterTimestamp(comentario.timestamp);
+        const data = converterTimestamp(comentario.timestamp);
         return (<div>
             <Jumbotron>
                 <h3>Comentário</h3>

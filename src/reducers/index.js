@@ -1,15 +1,14 @@
 import {
-        PEGAR_CATEGORIAS_INICIAIS,
+PEGAR_CATEGORIAS_INICIAIS,
         PEGAR_POSTAGENS_INICIAIS,
         PEGAR_COMENTARIOS_INICIAIS,
-        SELECIONAR_POSTAGEM
-        } from '../actions';
+        SELECIONAR_POSTAGEM,
+        REMOVER_POSTAGEM
+} from '../actions';
 
 const estadoInicial = {
-    postagemSelecionada: null,
     categorias: [],
     postagens: [],
-    comentarios: [],
 };
 
 function mural(state = estadoInicial, action) {
@@ -33,9 +32,19 @@ function mural(state = estadoInicial, action) {
                 ...state,
                 postagemSelecionada: action.postagem
             };
+        case REMOVER_POSTAGEM:
+            const estadoAtualizadoRemovendo = state;
+            estadoAtualizadoRemovendo.postagens = estadoAtualizadoRemovendo.postagens.map(
+                    postagem => {
+                        if (postagem.id === action.postagem.id) {
+                            postagem.deleted = true
+                        }
+                        return postagem;
+                    });
+            return estadoAtualizadoRemovendo;
         default:
             return state;
-}
+    }
 }
 
 export default mural;
