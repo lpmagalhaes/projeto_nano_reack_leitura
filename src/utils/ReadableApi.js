@@ -37,3 +37,23 @@ export const postPostagem = (postagem) =>
 export const removerPostagem = (idPostagem) =>
     fetch(`${api}/posts/${idPostagem}`, {headers,method:"DELETE"})
             .then(res => res.json())
+    
+export const alterarPostagem = (postagem) =>
+    fetch(`${api}/posts/${postagem.id}`, 
+    {
+        headers:{
+                ...headers,
+                'Content-Type': 'application/json'
+    }, 
+    method:"PUT", 
+    body: JSON.stringify({title: postagem.title, body: postagem.body})})
+            .then(res => res.json())
+            .catch(e => {
+                console.log(e instanceof SyntaxError); // true
+                console.log(e.message);                // "missing ; before statement"
+                console.log(e.name);                   // "SyntaxError"
+                console.log(e.fileName);               // "Scratchpad/1"
+                console.log(e.lineNumber);             // 1
+                console.log(e.columnNumber);           // 4
+                console.log(e.stack);                  // "@Scratchpad/1:2:3\n"
+              })

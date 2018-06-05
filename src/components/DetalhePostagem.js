@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import {Jumbotron, Button, Alert} from 'reactstrap';
 import {converterTimestamp} from '../utils/helper';
 
-class Postagem extends Component {
+class DetalhePostagem extends Component {
     render() {
-        const {postagem, selecionarPostagem, removerPostagem} = this.props;
+        const {postagem, selecionarPostagem, 
+            removerPostagem, selecionarParaEditarPostagem} = this.props;
         let data = null;
         if(postagem){
             data = converterTimestamp(postagem.timestamp);
@@ -31,9 +32,18 @@ class Postagem extends Component {
                     <Button color='danger'>Minus</Button>         
                 </p>
                 {removerPostagem &&  
-                    <p>        
-                        <Button onClick={() => {removerPostagem()}} color='danger'>Remover Postagem</Button>         
-                    </p>
+                    <div>
+                        <p>        
+                            <Button onClick={() => {removerPostagem()}} color='danger'>Remover Postagem</Button>         
+                        </p>
+                    </div>                    
+                }
+                {selecionarParaEditarPostagem &&  
+                    <div>
+                        <p>        
+                            <Button onClick={() => {selecionarParaEditarPostagem()}} >Editar Postagem</Button>         
+                        </p>
+                    </div>                    
                 }
             </Jumbotron> : <Alert color="danger">Postagem Apagada</Alert>}        
         </div>);
@@ -41,4 +51,4 @@ class Postagem extends Component {
 
 }
 
-export default Postagem;
+export default DetalhePostagem;

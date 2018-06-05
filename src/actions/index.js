@@ -6,6 +6,7 @@ export const PEGAR_COMENTARIOS_INICIAIS = 'PEGAR_COMENTARIOS_INICIAIS';
 export const SELECIONAR_POSTAGEM = 'SELECIONAR_POSTAGEM';
 export const REMOVER_POSTAGEM = 'REMOVER_POSTAGEM';
 export const ADICIONAR_POSTAGEM = 'ADICIONAR_POSTAGEM';
+export const ALTERAR_POSTAGEM = 'ALTERAR_POSTAGEM';
 
 export function pegarCategoriasIniciais(categorias) {
     return {
@@ -48,8 +49,6 @@ export const buscarComentarios = () => dispatch => (
     )
 );
 
-
-
 export function selecionarPostagem(postagem) {
     return {
         type: SELECIONAR_POSTAGEM,
@@ -71,6 +70,13 @@ export function adicionarPostagem(postagem) {
     }
 }
 
+export function atualizarPostagem(postagem) {
+    return {
+        type: ALTERAR_POSTAGEM,
+        postagem
+    }
+}
+
 export const salvarPostagem = (postagem) => dispatch => (
     ReadableApi.postPostagem(postagem)
         .then(postagemNova => dispatch(adicionarPostagem(postagemNova)))
@@ -79,5 +85,10 @@ export const salvarPostagem = (postagem) => dispatch => (
 export const inativarPostagem = (postagem) => dispatch => (
     ReadableApi.removerPostagem(postagem.id)
         .then(postagem => dispatch(removerPostagem(postagem)))
+);
+
+export const alterarPostagem = (postagem) => dispatch => (
+    ReadableApi.alterarPostagem(postagem)
+        .then(postagem => dispatch(atualizarPostagem(postagem)))
 );
 

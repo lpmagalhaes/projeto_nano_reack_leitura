@@ -17,7 +17,7 @@ const logger = store => next => action => {
             return resultado;
         };
 
-const store = createStore(reducer, applyMiddleware(thunk));
+const store = createStore(reducer, applyMiddleware(logger,thunk));
 
 ReactDOM.render(
         <Provider store={store}>

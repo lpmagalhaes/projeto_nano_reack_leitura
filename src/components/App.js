@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
 import {connect} from 'react-redux';
 import {buscarPostagens, buscarCategorias,
-    selecionarPostagem, removerPostagem, salvarPostagem, inativarPostagem} from '../actions';
+        selecionarPostagem, removerPostagem, 
+        salvarPostagem, inativarPostagem,
+        alterarPostagem} from '../actions';
 import {Alert, Button} from 'reactstrap';
-import Postagem from './Postagem';
+import DetalhePostagem from './DetalhePostagem';
 import Comentario from './Comentario';
-import NovaPostagem from './NovaPostagem';
+import SalvarPostagem from './SalvarPostagem';
+import EditarPostagem from './EditarPostagem';
 import Modal from 'react-modal';
 import * as ReadableApi from '../utils/ReadableApi';
 
@@ -19,12 +22,13 @@ class App extends Component {
         postagemSelecionada: null,
         modalDetalheAberto: false,
         modalPostagemAberto: false,
-    }    
+        modalAlterarPostagemAberto:false,
+    }
     componentDidMount() {
-        const {buscarCategorias, buscarPostagens, buscarComentarios, salvarPostagem} = this.props;
+        const {buscarCategorias, buscarPostagens} = this.props;
         buscarCategorias().then(resultado => this.setState({categorias: resultado.categorias}));
-        buscarPostagens().then(resultado => this.setState({postagens: resultado.postagens}));        
-    }    
+        buscarPostagens().then(resultado => this.setState({postagens: resultado.postagens}));
+    }
     selecionarCategoria(categoria) {
         this.setState({categoriaSelecionada: categoria});
     }
@@ -34,21 +38,21 @@ class App extends Component {
     selecionarPostagem(postagem) {
         this.setState({postagemSelecionada: postagem, modalDetalheAberto: true});
         ReadableApi.getComentariosDaPostagem(postagem.id)
-            .then(comentarios => this.setState({comentarios}))
-    }    
+                .then(comentarios => this.setState({comentarios}))
+    }
     removerPostagem(postagem) {
         const {removerPostagem} = this.props;
         removerPostagem(postagem);
         this.setState({postagemSelecionada: null});
         this.props.inativarPostagem(postagem);
     }
-    fecharModalDetalhe() {      
+    fecharModalDetalhe() {
         this.setState({modalDetalheAberto: false});
-    }    
-    abrirModalPostagem() {      
+    }
+    abrirModalPostagem() {
         this.setState({modalPostagemAberto: true});
-    }    
-    fecharModalPostagem() {      
+    }
+    fecharModalPostagem() {
         this.setState({modalPostagemAberto: false});
     }
     aoCriarPostagem(postagemParcial) {
@@ -60,13 +64,38 @@ class App extends Component {
         const {postagens} = this.state;
         postagens.push(postagemParcial)
         this.setState({postagens});
-        this.props.salvarPostagem(postagemParcial)        
+        this.props.salvarPostagem(postagemParcial)
         this.fecharModalPostagem();
     }
+    abrirModalParaAlterarPostagem(){
+        this.setState({modalAlterarPostagemAberto: true});
+    }
+    selecionarParaEditarPostagem(){
+        this.fecharModalDetalhe()
+        this.abrirModalParaAlterarPostagem();
+    }
+    fecharModalAlterarPostagem() {
+        this.setState({modalAlterarPostagemAberto: false});
+    }
+    aoAlterarPostagem(postagemAlterada) {
+        const {postagens} = this.state;
+        const postagensAjustadas = postagens.map(postagemNoEstado=>{
+           if(postagemNoEstado.id === postagemAlterada.id){
+               return postagemAlterada;
+           }else{
+               return postagemNoEstado;
+           }
+        });
+        this.props.alterarPostagem(postagemAlterada)
+                .then(this.setState({postagens: postagensAjustadas}));
+        this.fecharModalAlterarPostagem();
+    }
     render() {
-        const {categorias, postagens, comentarios, categoriaSelecionada, 
-            ordenacao, postagemSelecionada, modalDetalheAberto, modalPostagemAberto} = this.state;
-        console.log('state',this.state);
+        const {categorias, postagens, 
+            comentarios, categoriaSelecionada,
+            ordenacao, postagemSelecionada, 
+            modalDetalheAberto, modalPostagemAberto, 
+            modalAlterarPostagemAberto} = this.state;
         const corDefault = 'default';
         const corSuccess = 'success';
         const ordenacaoVotos = 'votos';
@@ -87,31 +116,32 @@ class App extends Component {
             postagemParaMostrar = postagemParaMostrar.sort((a, b) => (a.timestamp < b.timestamp));
         }
         return (<div className="content container">
-         <Alert color="primary">
+            <Alert color="primary">
                 Mural               
-                <Button onClick={()=>{this.abrirModalPostagem()}} size="sm" style={{float: 'right'}} color="success">
+                <Button onClick={() => {this.abrirModalPostagem()}} size="sm" style={{float: 'right'}} color="success">
                     Adicionar Postagem
                 </Button>                
             </Alert>        
             <Alert color="info">
                 Filtro &nbsp;
                 {
-                categorias.map(categoria => {
-                    let corBotao = 'default';
-                    if (categoria.name === categoriaSelecionada) {
-                        corBotao = 'success';
-                    }
+                    categorias.map(categoria => {
+                        let corBotao = 'default';
+                        if (categoria.name === categoriaSelecionada) {
+                            corBotao = 'success';
+                        }
                     return <Button 
-                        color={corBotao}
-                        onClick={() => (this.selecionarCategoria(categoria.name))} 
-                        key={categoria.name}
-                        style={{'marginLeft': '5px'}}>
-                        {categoria.name}
-                    </Button>
+                            color={corBotao}
+                            onClick={() => (this.selecionarCategoria(categoria.name))} 
+                            key={categoria.name}
+                            style={{'marginLeft': '5px'}}>
+                                {categoria.name}
+                            </Button>
                     })
                 }
                 <Button 
-                    color={corDefault}
+                    color={
+                                        corDefault}
                     onClick={() => (this.selecionarCategoria(null))} 
                     style={{'marginLeft': '5px'}}>
                     Limpar Filtro
@@ -136,37 +166,48 @@ class App extends Component {
             {
                 postagemParaMostrar
                     .filter(postagem => (postagem.deleted === false))
-                    .map(postagem => (
-                    <Postagem 
-                        key={postagem.id} 
-                        postagem={postagem} 
-                        selecionarPostagem={(postageSelecionada)=>{
-                            this.selecionarPostagem(postageSelecionada);
-                        }}
-                    />))
+                    .map(postagem => 
+                            (
+                                <DetalhePostagem 
+                                    key={postagem.id} 
+                                    postagem={postagem} 
+                                    selecionarPostagem={(postageSelecionada) => {
+                                            this.selecionarPostagem(postageSelecionada);
+                                    }}
+                                />
+                            )
+                        )
             }
-                    
-                    
             <Modal isOpen={modalDetalheAberto}>
                 <div>
-                    <Button onClick={()=>{this.fecharModalDetalhe()}}>Fechar</Button>
-                    <Postagem 
+                    <Button onClick={() => {this.fecharModalDetalhe()}}>Fechar</Button>
+                    <DetalhePostagem 
                         postagem={postagemSelecionada} 
-                        removerPostagem={()=>{
-                            this.removerPostagem(postagemSelecionada);
-                        }}
-                    />
-                    {postagemSelecionada && comentarios && comentarios
-                        .filter(comentario => (comentario.parentId === postagemSelecionada.id))
-                        .filter(comentario => (comentario.deleted === false))
-                        .sort((a, b) => (a.voteScore < b.voteScore))
-                        .map(comentario => (<Comentario key={comentario.id} comentario={comentario} />))}
+                        removerPostagem={(postagemSelecionada) => {this.removerPostagem(postagemSelecionada)}}
+                        selecionarParaEditarPostagem={() => {this.selecionarParaEditarPostagem()}}
+                        />
+                        {postagemSelecionada && comentarios && comentarios
+                            .filter(comentario => (comentario.parentId === postagemSelecionada.id))
+                            .filter(comentario => (comentario.deleted === false))
+                            .sort((a, b) => (a.voteScore < b.voteScore))
+                            .map(comentario => (<Comentario key={comentario.id} comentario={comentario} />))}
                 </div>
             </Modal>
             <Modal isOpen={modalPostagemAberto}>
                 <div>
-                    <Button onClick={()=>{this.fecharModalPostagem()}}>Fechar</Button>
-                    <NovaPostagem aoCriarPostagem={postagemParcial => this.aoCriarPostagem(postagemParcial)} />
+                    <Button onClick={() => {this.fecharModalPostagem()}}>Fechar</Button>
+                    <SalvarPostagem 
+                        aoCriarPostagem={postagemParcial => this.aoCriarPostagem(postagemParcial)} 
+                    />
+                </div>
+            </Modal>
+            <Modal isOpen={modalAlterarPostagemAberto}>
+                <div>
+                    <Button onClick={() => {this.fecharModalAlterarPostagem()}}>Fechar</Button>
+                    <EditarPostagem 
+                        aoAlterarPostagem={postagemAlterada => this.aoAlterarPostagem(postagemAlterada)} 
+                        postagem={postagemSelecionada}
+                    />
                 </div>
             </Modal>
         </div>);
@@ -186,6 +227,7 @@ function mapDispatchToProps(dispatch) {
         removerPostagem: (data) => dispatch(removerPostagem(data)),
         salvarPostagem: (data) => dispatch(salvarPostagem(data)),
         inativarPostagem: (data) => dispatch(inativarPostagem(data)),
+        alterarPostagem: (data) => dispatch(alterarPostagem(data)),
     };
 }
 
