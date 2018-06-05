@@ -27,7 +27,8 @@ class App extends Component {
     componentDidMount() {
         const {buscarCategorias, buscarPostagens} = this.props;
         buscarCategorias().then(resultado => this.setState({categorias: resultado.categorias}));
-        buscarPostagens().then(resultado => this.setState({postagens: resultado.postagens}));
+        buscarPostagens().then(resultado => this.setState({postagens: resultado.postagens}));        
+        Modal.setAppElement('body');
     }
     selecionarCategoria(categoria) {
         this.setState({categoriaSelecionada: categoria});
@@ -183,7 +184,7 @@ class App extends Component {
                     <Button onClick={() => {this.fecharModalDetalhe()}}>Fechar</Button>
                     <DetalhePostagem 
                         postagem={postagemSelecionada} 
-                        removerPostagem={(postagemSelecionada) => {this.removerPostagem(postagemSelecionada)}}
+                        removerPostagem={() => {this.removerPostagem(postagemSelecionada)}}
                         selecionarParaEditarPostagem={() => {this.selecionarParaEditarPostagem()}}
                         />
                         {postagemSelecionada && comentarios && comentarios

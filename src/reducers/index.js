@@ -49,13 +49,15 @@ function mural(state = estadoInicial, action) {
             estadoAtualizadoPostagem.postagens.push(...action.postagem);
             return estadoAtualizadoPostagem;
         case ALTERAR_POSTAGEM:
-            const estadoAtualizadoAlterarPostagem = state.postagens.map(postagemNoEstado => {
+            const estadoAtualizadoAlterarPostagem = state;
+            const postagensAtualizadas = state.postagens.map(postagemNoEstado => {
                 if (postagemNoEstado.id === action.postagem.id) {
                     return action.postagem;
                 } else {
                     return postagemNoEstado;
                 }
             });
+            estadoAtualizadoAlterarPostagem.postagens = postagensAtualizadas;
             return estadoAtualizadoAlterarPostagem;
         default:
             return state;
