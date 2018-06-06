@@ -1,7 +1,6 @@
 import {
 PEGAR_CATEGORIAS_INICIAIS,
         PEGAR_POSTAGENS_INICIAIS,
-        PEGAR_COMENTARIOS_INICIAIS,
         SELECIONAR_POSTAGEM,
         REMOVER_POSTAGEM,
         ADICIONAR_POSTAGEM,
@@ -25,10 +24,6 @@ function mural(state = estadoInicial, action) {
                 ...state,
                 postagens: action.postagens
             };
-        case PEGAR_COMENTARIOS_INICIAIS:
-            const estadoAtualizado = state;
-            estadoAtualizado.comentarios.push(...action.comentarios);
-            return estadoAtualizado;
         case SELECIONAR_POSTAGEM:
             return {
                 ...state,
@@ -50,14 +45,14 @@ function mural(state = estadoInicial, action) {
             return estadoAtualizadoPostagem;
         case ALTERAR_POSTAGEM:
             const estadoAtualizadoAlterarPostagem = state;
-            const postagensAtualizadas = state.postagens.map(postagemNoEstado => {
-                if (postagemNoEstado.id === action.postagem.id) {
-                    return action.postagem;
-                } else {
-                    return postagemNoEstado;
-                }
-            });
-            estadoAtualizadoAlterarPostagem.postagens = postagensAtualizadas;
+            estadoAtualizadoAlterarPostagem.postagens = estadoAtualizadoAlterarPostagem.postagens.map(
+                    postagemNoEstado => {
+                        if (postagemNoEstado.id === action.postagem.id) {
+                            return action.postagem;
+                        } else {
+                            return postagemNoEstado;
+                        }
+                    });
             return estadoAtualizadoAlterarPostagem;
         default:
             return state;

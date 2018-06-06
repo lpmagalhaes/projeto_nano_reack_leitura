@@ -34,8 +34,8 @@ export const postPostagem = (postagem) =>
     body: JSON.stringify(postagem)})
             .then(res => res.json())
 
-export const removerPostagem = (idPostagem) =>
-    fetch(`${api}/posts/${idPostagem}`, {headers,method:"DELETE"})
+export const removerPostagem = (postagem) =>
+    fetch(`${api}/posts/${postagem.id}`, {headers,method:"DELETE"})
             .then(res => res.json())
     
 export const alterarPostagem = (postagem) =>
@@ -48,12 +48,29 @@ export const alterarPostagem = (postagem) =>
     method:"PUT", 
     body: JSON.stringify({title: postagem.title, body: postagem.body})})
             .then(res => res.json())
-            .catch(e => {
-                console.log(e instanceof SyntaxError); // true
-                console.log(e.message);                // "missing ; before statement"
-                console.log(e.name);                   // "SyntaxError"
-                console.log(e.fileName);               // "Scratchpad/1"
-                console.log(e.lineNumber);             // 1
-                console.log(e.columnNumber);           // 4
-                console.log(e.stack);                  // "@Scratchpad/1:2:3\n"
-              })
+              
+export const postComentario = (comentario) =>
+    fetch(`${api}/comments`, 
+    {
+        headers:{
+                ...headers,
+                'Content-Type': 'application/json'
+    }, 
+    method:"POST", 
+    body: JSON.stringify(comentario)})
+            .then(res => res.json())
+
+export const removerComentario = (comentario) =>
+    fetch(`${api}/comments/${comentario.id}`, {headers,method:"DELETE"})
+            .then(res => res.json())
+    
+export const alterarComentario = (comentario) =>
+    fetch(`${api}/comments/${comentario.id}`, 
+    {
+        headers:{
+                ...headers,
+                'Content-Type': 'application/json'
+    }, 
+    method:"PUT", 
+    body: JSON.stringify({timestamp: Date.now(), body: comentario.body})})
+            .then(res => res.json())

@@ -91,6 +91,40 @@ class App extends Component {
                 .then(this.setState({postagens: postagensAjustadas}));
         this.fecharModalAlterarPostagem();
     }
+    aoCriarComentario(comentarioParcial, postagem) {
+        comentarioParcial.id = Date.now();
+        comentarioParcial.timestamp = Date.now();
+        comentarioParcial.voteScore = 1;
+        comentarioParcial.deleted = false;
+        comentarioParcial.parentDeleted = false;
+        const {comentarios, postagens} = this.state;
+        comentarios.push(comentarioParcial);       
+        postagem.commentCount++;
+        this.props.alterarPostagem(postagem);
+        ReadableApi.postComentario(comentarioParcial)
+            .then(this.setState({comentarios}));
+    }
+    removerComentario(comentarioRemovido, postagem){
+        const {comentarios, postagens} = this.state;
+        const comentariosAtualizados = comentarios
+                .filter(comentarioNoEstado => comentarioNoEstado.id !== comentarioRemovido.id);   
+        postagem.commentCount--;
+        this.props.alterarPostagem(postagem);
+        ReadableApi.removerComentario(comentarioRemovido)
+            .then(this.setState({comentarios: comentariosAtualizados}));
+    }
+    aoAlterarComentario(comentarioAlterado) {
+        const {comentarios} = this.state;
+        const comentariosAjustados = comentarios.map(pcomentarioNoEstado=>{
+           if(pcomentarioNoEstado.id === comentarioAlterado.id){
+               return comentarioAlterado;
+           }else{
+               return pcomentarioNoEstado;
+           }
+        });
+        ReadableApi.alterarComentario(comentarioAlterado)
+            .then(this.setState({comentarios: comentariosAjustados}));
+    }
     render() {
         const {categorias, postagens, 
             comentarios, categoriaSelecionada,
@@ -186,12 +220,18 @@ class App extends Component {
                         postagem={postagemSelecionada} 
                         removerPostagem={() => {this.removerPostagem(postagemSelecionada)}}
                         selecionarParaEditarPostagem={() => {this.selecionarParaEditarPostagem()}}
+                        aoCriarComentario={(comentarioParcial, postagem)=>(this.aoCriarComentario(comentarioParcial, postagem))}
                         />
                         {postagemSelecionada && comentarios && comentarios
                             .filter(comentario => (comentario.parentId === postagemSelecionada.id))
                             .filter(comentario => (comentario.deleted === false))
                             .sort((a, b) => (a.voteScore < b.voteScore))
-                            .map(comentario => (<Comentario key={comentario.id} comentario={comentario} />))}
+                            .map(comentario => (<Comentario 
+                                key={comentario.id} 
+                                comentario={comentario}
+                                removerComentario={comentario => this.removerComentario(comentario, postagemSelecionada)}                                            
+                                aoAlterarComentario={comentario => this.aoAlterarComentario(comentario)}
+                                />))}
                 </div>
             </Modal>
             <Modal isOpen={modalPostagemAberto}>

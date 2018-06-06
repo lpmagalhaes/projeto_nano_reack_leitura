@@ -15,8 +15,8 @@ class SalvarPostagem extends Component {
         const {categorias} = this.props;
         return (<div>
                 <h1>Salvar Postagem</h1>
-                <form onSubmit={this.auxiliarDeSubmiti} className='create-contact-form'>
-                    <div className='create-contact-details'>
+                <form onSubmit={this.auxiliarDeSubmiti}>
+                    <div>
                         <p><input type='text' name='title' placeholder='Titulo'/></p>
                         <p><input type='text' name='body' placeholder='Corpo'/></p>
                         <p><input type='text' name='author' placeholder='Autor'/></p>

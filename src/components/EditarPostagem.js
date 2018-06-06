@@ -36,8 +36,8 @@ class EditarPostagem extends Component {
         const {title, body} = this.state;
         return (<div>
             <h1>Alterar Postagem</h1>
-            <form onSubmit={this.auxiliarDeSubmiti} className='create-contact-form'>
-                <div className='create-contact-details'>
+            <form onSubmit={this.auxiliarDeSubmiti}>
+                <div>
                     <p>Titulo</p>
                     <p>
                         <input 

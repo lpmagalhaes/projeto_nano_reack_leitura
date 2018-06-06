@@ -1,11 +1,44 @@
 import React, { Component } from 'react';
 import {Jumbotron, Button, Alert} from 'reactstrap';
 import {converterTimestamp} from '../utils/helper';
+import serializeForm from 'form-serialize';
 
 class DetalhePostagem extends Component {
+    state = {
+        divCriarComentario: false,
+        body: '',
+        author: '',
+    }
+    
+    mostrarDivParaCriarComentario(){
+        this.setState({divCriarComentario: true});
+    }
+    atualizarCampoCorpo = (valor) => {
+        this.setState({body: valor});
+    }
+    atualizarCampoAutor = (valor) => {
+        this.setState({author: valor});
+    }
+    auxiliarDeSubmiti = (evento) => {
+        evento.preventDefault();
+        const valores = serializeForm(evento.target, {hash: true});
+        if (this.props.aoCriarComentario) {
+            const {postagem} = this.props;           
+            valores.parentId = postagem.id;
+            this.props.aoCriarComentario(valores, postagem);
+            this.esconderDivParaCriarComentario();
+        }
+    }
+    
+    esconderDivParaCriarComentario(){
+        this.setState({divCriarComentario: false});
+    }
+    
     render() {
         const {postagem, selecionarPostagem, 
-            removerPostagem, selecionarParaEditarPostagem} = this.props;
+            removerPostagem, selecionarParaEditarPostagem,
+            aoCriarComentario} = this.props;
+        const {divCriarComentario, body, author} = this.state;
         let data = null;
         if(postagem){
             data = converterTimestamp(postagem.timestamp);
@@ -44,6 +77,45 @@ class DetalhePostagem extends Component {
                             <Button onClick={() => {selecionarParaEditarPostagem()}} >Editar Postagem</Button>         
                         </p>
                     </div>                    
+                }
+                {aoCriarComentario &&
+                    <div>
+                         <p>        
+                             <Button onClick={() => this.mostrarDivParaCriarComentario()} color='info' >Novo Cometario</Button>         
+                         </p>
+                    </div>    
+                }
+                {divCriarComentario &&
+                    <div>
+                        <form onSubmit={this.auxiliarDeSubmiti}>
+                            <p>Criar Comentario</p> 
+                            <p>Autor</p>
+                            <p>
+                                <input 
+                                    value={author}
+                                    type='text' 
+                                    name='author'
+                                    placeholder='Autor'                            
+                                    onChange={(event) => {
+                                        this.atualizarCampoAutor(event.target.value)
+                                    }} 
+                                />
+                            </p>
+                            <p>Corpo</p>
+                            <p>
+                                <input 
+                                    value={body}
+                                    type='text' 
+                                    name='body'
+                                    placeholder='Corpo'                            
+                                    onChange={(event) => {
+                                        this.atualizarCampoCorpo(event.target.value)
+                                    }} 
+                                />
+                            </p>
+                            <p><Button>Criar</Button></p>
+                        </form>
+                    </div>
                 }
             </Jumbotron> : <Alert color="danger">Postagem Apagada</Alert>}        
         </div>);
