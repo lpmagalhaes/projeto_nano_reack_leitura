@@ -74,3 +74,22 @@ export const alterarComentario = (comentario) =>
     method:"PUT", 
     body: JSON.stringify({timestamp: Date.now(), body: comentario.body})})
             .then(res => res.json())
+    
+export const votar = (id,tipo,valor) =>
+    fetch(`${api}/${tipo}/${id}`,
+    {
+        headers:{
+                ...headers,
+                'Content-Type': 'application/json'
+    }, 
+    method:"POST", 
+    body: JSON.stringify({option: valor})})
+            .then(res => res.json())
+    
+export const encontrarPostagemPorId = (id) =>
+    fetch(`${api}/posts/${id}`, {headers})
+            .then(res => res.json())
+
+export const encontrarComentarioPorId = (id) =>
+    fetch(`${api}/comments/${id}`, {headers})
+            .then(res => res.json())

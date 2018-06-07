@@ -37,7 +37,7 @@ class DetalhePostagem extends Component {
     render() {
         const {postagem, selecionarPostagem, 
             removerPostagem, selecionarParaEditarPostagem,
-            aoCriarComentario} = this.props;
+            aoCriarComentario, votar} = this.props;
         const {divCriarComentario, body, author} = this.state;
         let data = null;
         if(postagem){
@@ -61,8 +61,8 @@ class DetalhePostagem extends Component {
                 </p>
                 <p>
                     Score: {postagem.voteScore}&nbsp;
-                    <Button color='success'>Plus</Button>&nbsp;
-                    <Button color='danger'>Minus</Button>         
+                    <Button color='success' onClick={() => {votar(postagem.id,'posts','upVote')}}>Plus</Button>&nbsp;
+                    <Button color='danger' onClick={() => {votar(postagem.id,'posts','downVote')}}>Minus</Button>         
                 </p>
                 {removerPostagem &&  
                     <div>

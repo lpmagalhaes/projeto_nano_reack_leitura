@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {connect} from 'react-redux';
 import {buscarPostagens, buscarCategorias,
-        selecionarPostagem, removerPostagem, 
+        selecionarPostagem, removerPostagem,
         salvarPostagem, inativarPostagem,
         alterarPostagem} from '../actions';
 import {Alert, Button} from 'reactstrap';
@@ -22,12 +22,12 @@ class App extends Component {
         postagemSelecionada: null,
         modalDetalheAberto: false,
         modalPostagemAberto: false,
-        modalAlterarPostagemAberto:false,
+        modalAlterarPostagemAberto: false,
     }
     componentDidMount() {
         const {buscarCategorias, buscarPostagens} = this.props;
         buscarCategorias().then(resultado => this.setState({categorias: resultado.categorias}));
-        buscarPostagens().then(resultado => this.setState({postagens: resultado.postagens}));        
+        buscarPostagens().then(resultado => this.setState({postagens: resultado.postagens}));
         Modal.setAppElement('body');
     }
     selecionarCategoria(categoria) {
@@ -68,28 +68,32 @@ class App extends Component {
         this.props.salvarPostagem(postagemParcial)
         this.fecharModalPostagem();
     }
-    abrirModalParaAlterarPostagem(){
+    abrirModalParaAlterarPostagem() {
         this.setState({modalAlterarPostagemAberto: true});
     }
-    selecionarParaEditarPostagem(){
+    selecionarParaEditarPostagem() {
         this.fecharModalDetalhe()
         this.abrirModalParaAlterarPostagem();
     }
     fecharModalAlterarPostagem() {
         this.setState({modalAlterarPostagemAberto: false});
     }
-    aoAlterarPostagem(postagemAlterada) {
-        const {postagens} = this.state;
-        const postagensAjustadas = postagens.map(postagemNoEstado=>{
-           if(postagemNoEstado.id === postagemAlterada.id){
-               return postagemAlterada;
-           }else{
-               return postagemNoEstado;
-           }
-        });
+    aoAlterarPostagem(postagemAlterada) {      
         this.props.alterarPostagem(postagemAlterada)
-                .then(this.setState({postagens: postagensAjustadas}));
-        this.fecharModalAlterarPostagem();
+                .then();
+        this.fecharModalAlterarPostagem(this.mudarEstadoDaPostagemAlterada(postagemAlterada));
+    }
+    mudarEstadoDaPostagemAlterada(postagemAlterada){
+          const {postagens} = this.state;
+        const postagensAjustadas = postagens.map(postagemNoEstado => {
+            if (postagemNoEstado.id === postagemAlterada.id) {
+                return postagemAlterada;
+            } else {
+                return postagemNoEstado;
+            }
+        });
+        
+        this.setState({postagens: postagensAjustadas})
     }
     aoCriarComentario(comentarioParcial, postagem) {
         comentarioParcial.id = Date.now();
@@ -97,39 +101,69 @@ class App extends Component {
         comentarioParcial.voteScore = 1;
         comentarioParcial.deleted = false;
         comentarioParcial.parentDeleted = false;
-        const {comentarios, postagens} = this.state;
-        comentarios.push(comentarioParcial);       
+        const {comentarios} = this.state;
+        comentarios.push(comentarioParcial);
         postagem.commentCount++;
         this.props.alterarPostagem(postagem);
         ReadableApi.postComentario(comentarioParcial)
-            .then(this.setState({comentarios}));
+                .then(this.setState({comentarios}));
     }
-    removerComentario(comentarioRemovido, postagem){
-        const {comentarios, postagens} = this.state;
+    removerComentario(comentarioRemovido, postagem) {
+        const {comentarios} = this.state;
         const comentariosAtualizados = comentarios
-                .filter(comentarioNoEstado => comentarioNoEstado.id !== comentarioRemovido.id);   
+                .filter(comentarioNoEstado => comentarioNoEstado.id !== comentarioRemovido.id);
         postagem.commentCount--;
         this.props.alterarPostagem(postagem);
         ReadableApi.removerComentario(comentarioRemovido)
-            .then(this.setState({comentarios: comentariosAtualizados}));
+                .then(this.setState({comentarios: comentariosAtualizados}));
     }
-    aoAlterarComentario(comentarioAlterado) {
-        const {comentarios} = this.state;
-        const comentariosAjustados = comentarios.map(pcomentarioNoEstado=>{
-           if(pcomentarioNoEstado.id === comentarioAlterado.id){
-               return comentarioAlterado;
-           }else{
-               return pcomentarioNoEstado;
-           }
-        });
+    aoAlterarComentario(comentarioAlterado) {       
         ReadableApi.alterarComentario(comentarioAlterado)
-            .then(this.setState({comentarios: comentariosAjustados}));
+            .then(this.mudarEstadoDoComentarioAlterado(comentarioAlterado));
+    }
+    mudarEstadoDoComentarioAlterado(comentarioAlterado){
+         const {comentarios} = this.state;
+        const comentariosAjustados = comentarios.map(pcomentarioNoEstado => {
+            if (pcomentarioNoEstado.id === comentarioAlterado.id) {
+                return comentarioAlterado;
+            } else {
+                return pcomentarioNoEstado;
+            }
+        });
+        
+        this.setState({comentarios: comentariosAjustados})
+    }
+    votar(id, tipo, valor) {       
+        if(tipo === 'posts'){
+            ReadableApi.encontrarPostagemPorId(id)
+                .then(postagemEncontrada => {
+                    if(valor === 'upVote'){
+                        postagemEncontrada.voteScore++;
+                    }else{
+                        postagemEncontrada.voteScore--;
+                    }
+                    this.mudarEstadoDaPostagemAlterada(postagemEncontrada);
+                    this.setState({postagemSelecionada: postagemEncontrada});
+                    ReadableApi.votar(id, tipo, valor);
+                })
+        }else{
+             ReadableApi.encontrarComentarioPorId(id)
+                .then(comentarioEncontrado => {
+                    if(valor === 'upVote'){
+                        comentarioEncontrado.voteScore++;
+                    }else{
+                        comentarioEncontrado.voteScore--;
+                    }
+                    this.mudarEstadoDoComentarioAlterado(comentarioEncontrado);
+                    ReadableApi.votar(id, tipo, valor);
+                })
+        }          
     }
     render() {
-        const {categorias, postagens, 
+        const {categorias, postagens,
             comentarios, categoriaSelecionada,
-            ordenacao, postagemSelecionada, 
-            modalDetalheAberto, modalPostagemAberto, 
+            ordenacao, postagemSelecionada,
+            modalDetalheAberto, modalPostagemAberto,
             modalAlterarPostagemAberto} = this.state;
         const corDefault = 'default';
         const corSuccess = 'success';
@@ -165,18 +199,17 @@ class App extends Component {
                         if (categoria.name === categoriaSelecionada) {
                             corBotao = 'success';
                         }
-                    return <Button 
-                            color={corBotao}
-                            onClick={() => (this.selecionarCategoria(categoria.name))} 
-                            key={categoria.name}
-                            style={{'marginLeft': '5px'}}>
-                                {categoria.name}
-                            </Button>
+                        return  <Button 
+                                    color={corBotao}
+                                    onClick={() => (this.selecionarCategoria(categoria.name))} 
+                                    key={categoria.name}
+                                    style={{'marginLeft': '5px'}}>
+                                    {categoria.name}
+                                </Button>
                     })
                 }
                 <Button 
-                    color={
-                                        corDefault}
+                    color={corDefault}
                     onClick={() => (this.selecionarCategoria(null))} 
                     style={{'marginLeft': '5px'}}>
                     Limpar Filtro
@@ -201,14 +234,13 @@ class App extends Component {
             {
                 postagemParaMostrar
                     .filter(postagem => (postagem.deleted === false))
-                    .map(postagem => 
+                    .map(postagem =>
                             (
-                                <DetalhePostagem 
-                                    key={postagem.id} 
-                                    postagem={postagem} 
-                                    selecionarPostagem={(postageSelecionada) => {
-                                            this.selecionarPostagem(postageSelecionada);
-                                    }}
+                            <DetalhePostagem 
+                                key={postagem.id} 
+                                postagem={postagem} 
+                                selecionarPostagem={(postageSelecionada) => {this.selecionarPostagem(postageSelecionada)}}
+                                votar={(id, tipo, valor)=>this.votar(id, tipo, valor)}
                                 />
                             )
                         )
@@ -220,18 +252,20 @@ class App extends Component {
                         postagem={postagemSelecionada} 
                         removerPostagem={() => {this.removerPostagem(postagemSelecionada)}}
                         selecionarParaEditarPostagem={() => {this.selecionarParaEditarPostagem()}}
-                        aoCriarComentario={(comentarioParcial, postagem)=>(this.aoCriarComentario(comentarioParcial, postagem))}
+                        aoCriarComentario={(comentarioParcial, postagem) => (this.aoCriarComentario(comentarioParcial, postagem))}
+                        votar={(id, tipo, valor)=>this.votar(id, tipo, valor)}
                         />
-                        {postagemSelecionada && comentarios && comentarios
-                            .filter(comentario => (comentario.parentId === postagemSelecionada.id))
-                            .filter(comentario => (comentario.deleted === false))
-                            .sort((a, b) => (a.voteScore < b.voteScore))
-                            .map(comentario => (<Comentario 
-                                key={comentario.id} 
-                                comentario={comentario}
-                                removerComentario={comentario => this.removerComentario(comentario, postagemSelecionada)}                                            
-                                aoAlterarComentario={comentario => this.aoAlterarComentario(comentario)}
-                                />))}
+                    {postagemSelecionada && comentarios && comentarios
+                        .filter(comentario => (comentario.parentId === postagemSelecionada.id))
+                        .filter(comentario => (comentario.deleted === false))
+                        .sort((a, b) => (a.voteScore < b.voteScore))
+                        .map(comentario => (<Comentario 
+                                            key={comentario.id} 
+                                            comentario={comentario}
+                                            removerComentario={comentario => this.removerComentario(comentario, postagemSelecionada)}                                            
+                                            aoAlterarComentario={comentario => this.aoAlterarComentario(comentario)}
+                                            votar={(id, tipo, valor)=>this.votar(id, tipo, valor)}
+                                            />))}
                 </div>
             </Modal>
             <Modal isOpen={modalPostagemAberto}>
@@ -239,7 +273,7 @@ class App extends Component {
                     <Button onClick={() => {this.fecharModalPostagem()}}>Fechar</Button>
                     <SalvarPostagem 
                         aoCriarPostagem={postagemParcial => this.aoCriarPostagem(postagemParcial)} 
-                    />
+                        />
                 </div>
             </Modal>
             <Modal isOpen={modalAlterarPostagemAberto}>
@@ -248,13 +282,12 @@ class App extends Component {
                     <EditarPostagem 
                         aoAlterarPostagem={postagemAlterada => this.aoAlterarPostagem(postagemAlterada)} 
                         postagem={postagemSelecionada}
-                    />
+                        />
                 </div>
             </Modal>
         </div>);
     }
 }
-
 
 function mapStateToProps( {categorias, postagens}) {
     return {categorias, postagens};

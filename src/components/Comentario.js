@@ -34,7 +34,7 @@ class Comentario extends Component {
     render() {
         const {divAlterarComentario, body} = this.state;
         const {comentario, removerComentario,
-        aoAlterarComentario} = this.props;
+        aoAlterarComentario, votar} = this.props;
         const data = converterTimestamp(comentario.timestamp);
         return (<div>
             <Jumbotron>
@@ -44,8 +44,8 @@ class Comentario extends Component {
                 <p className="lead">{data} - Author: {comentario.author}</p> 
                 <p>
                     Score: {comentario.voteScore}&nbsp;
-                    <Button color='success'>Plus</Button>&nbsp;
-                    <Button color='danger'>Minus</Button>         
+                    <Button color='success' onClick={() => {votar(comentario.id,'comments','upVote')}}>Plus</Button>&nbsp;
+                    <Button color='danger' onClick={() => {votar(comentario.id,'comments','downVote')}}>Minus</Button>       
                 </p>  
                 {removerComentario &&
                     <div>
