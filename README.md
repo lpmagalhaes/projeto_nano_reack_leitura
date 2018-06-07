@@ -10,3 +10,11 @@ Para inicia-lo
 * inicie o projeto com o comando `npm start`
 
 ## Funções
+
+* Listar postagens
+* Mudar ordenação
+* Filtrar postagem por categoria
+* Ver detalhes de uma postagem
+* Adicionar, editar ou remover uma postagem
+* Adicionar, editar ou remover um comentário
+* Votar numa postagem ou comentário
