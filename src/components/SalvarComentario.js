@@ -2,23 +2,14 @@ import React, { Component } from 'react';
 import serializeForm from 'form-serialize';
 import {Button, Alert} from 'reactstrap';
 
-class EditarPostagem extends Component {
+class SalvarComentario extends Component {
     state = {
         mostrarMensagemDeErro: false,
-        title: '',
+        author: '',
         body: '',
     }
-    componentDidMount() {
-        const {postagem} = this.props;
-        this.setState(
-                {
-                    title: postagem.title,
-                    body: postagem.body,
-                }
-        );
-    }
-    atualizarCampoTitulo = (valor) => {
-        this.setState({title: valor});
+    atualizarCampoAutor = (valor) => {
+        this.setState({author: valor});
     }
     atualizarCampoCorpo = (valor) => {
         this.setState({body: valor});
@@ -26,36 +17,31 @@ class EditarPostagem extends Component {
     auxiliarDeSubmiti = (evento) => {
         evento.preventDefault();
         const valores = serializeForm(evento.target, {hash: true});
-        if (valores.title === undefined || valores.body === undefined) {
+        if (valores.author === undefined || valores.body === undefined) {
             this.setState({mostrarMensagemDeErro: true});
             return;
         } else {
             this.setState({mostrarMensagemDeErro: false});
         }
-        if (this.props.aoAlterarPostagem) {
-            const {postagem} = this.props;
-            postagem.title = valores.title;
-            postagem.body = valores.body;
-            this.props.aoAlterarPostagem(postagem);
+        if (this.props.aoCriarComentario) {
+            this.props.aoCriarComentario(valores);
         }
     }
     render() {
-        const {title, body, mostrarMensagemDeErro} = this.state;
+        const {author, body, mostrarMensagemDeErro} = this.state;
         return (<div>
-            <h1>Alterar Postagem</h1>
+            <h1>Novo Comentário</h1>
             <form onSubmit={this.auxiliarDeSubmiti}>
                 {mostrarMensagemDeErro && <Alert color='danger'>Preencha todos os dados!</Alert>}
                 <div>
                     <p>Titulo</p>
                     <p>
                         <input 
-                            value={title} 
+                            value={author} 
                             type='text' 
-                            name='title' 
-                            placeholder='Titulo'
-                            onChange={(event) => {
-                        this.atualizarCampoTitulo(event.target.value)
-                                    }}                    
+                            name='author' 
+                            placeholder='Autor'
+                            onChange={(event) => {this.atualizarCampoAutor(event.target.value)}}                    
                             />
                     </p>
                     <p>Corpo</p>
@@ -65,16 +51,14 @@ class EditarPostagem extends Component {
                             type='text' 
                             name='body'
                             placeholder='Corpo'                            
-                            onChange={(event) => {
-                            this.atualizarCampoCorpo(event.target.value)
-                                    }} 
+                            onChange={(event) => {this.atualizarCampoCorpo(event.target.value)}} 
                             />
                     </p>
-                    <p><Button>Alterar Postagem</Button></p>
+                    <p><Button>Adicionar Comentário</Button></p>
                 </div>
             </form>
         </div>);
     }
 }
 
-export default EditarPostagem;
+export default SalvarComentario;

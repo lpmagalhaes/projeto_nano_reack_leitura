@@ -1,126 +1,120 @@
 import React, { Component } from 'react';
-import {Jumbotron, Button, Alert} from 'reactstrap';
-import {converterTimestamp} from '../utils/helper';
-import serializeForm from 'form-serialize';
+import * as ReadableApi from '../utils/ReadableApi';
+import Postagem from './Postagem';
+import SalvarComentario from './SalvarComentario';
+import Comentario from './Comentario';
+import {Alert, Button} from 'reactstrap';
+import {Link} from 'react-router-dom';
+import {alterarPostagem} from '../actions';
+import {connect} from 'react-redux';
 
 class DetalhePostagem extends Component {
-    state = {
+     state = {
+        postagem: null,
+        comentarios: [],
         divCriarComentario: false,
-        body: '',
-        author: '',
     }
-    
+    componentDidMount(){
+        const {location} = this.props;
+        if(location.pathname.split('/')[2]){
+            const postagemUrl = location.pathname.split('/')[2];
+            ReadableApi.encontrarPostagemPorId(postagemUrl)
+                .then(postagemAchada => {
+                    ReadableApi.getComentariosDaPostagem(postagemAchada.id)
+                        .then(comentarios => this.setState({comentarios}));    
+                    this.setState({postagem: postagemAchada});
+            });
+        }
+    } 
     mostrarDivParaCriarComentario(){
         this.setState({divCriarComentario: true});
+    }    
+    aoCriarComentario(comentarioParcial) {
+        const {comentarios, postagem} = this.state;
+        comentarioParcial.id = Date.now();
+        comentarioParcial.timestamp = Date.now();
+        comentarioParcial.voteScore = 1;
+        comentarioParcial.deleted = false;
+        comentarioParcial.parentDeleted = false;
+        comentarioParcial.parentId = postagem.id;        
+        comentarios.push(comentarioParcial);        
+        postagem.commentCount++
+        ReadableApi.postComentario(comentarioParcial)
+            .then(this.props.alterarPostagem(postagem))
+            .then(()=>{
+                this.esconderDivParaCriarComentario();
+                this.setState({comentarios,postagem});
+            });
     }
-    atualizarCampoCorpo = (valor) => {
-        this.setState({body: valor});
-    }
-    atualizarCampoAutor = (valor) => {
-        this.setState({author: valor});
-    }
-    auxiliarDeSubmiti = (evento) => {
-        evento.preventDefault();
-        const valores = serializeForm(evento.target, {hash: true});
-        if (this.props.aoCriarComentario) {
-            const {postagem} = this.props;           
-            valores.parentId = postagem.id;
-            this.props.aoCriarComentario(valores, postagem);
-            this.esconderDivParaCriarComentario();
-        }
-    }
-    
     esconderDivParaCriarComentario(){
         this.setState({divCriarComentario: false});
     }
-    
+    removerComentario(comentarioRemovido) {
+        const {comentarios, postagem} = this.state;
+        const comentariosAtualizados = comentarios
+                .filter(comentarioNoEstado => comentarioNoEstado.id !== comentarioRemovido.id);
+        postagem.commentCount--;
+        ReadableApi.removerComentario(comentarioRemovido)
+            .then(this.props.alterarPostagem(postagem))
+            .then(()=>{
+                this.esconderDivParaCriarComentario();
+                this.setState({comentarios: comentariosAtualizados,postagem});
+            });
+    }
+    aoAlterarComentario(comentarioAlterado) {       
+        ReadableApi.alterarComentario(comentarioAlterado)
+            .then(this.mudarEstadoDoComentarioAlterado(comentarioAlterado));
+    }
+    mudarEstadoDoComentarioAlterado(comentarioAlterado){
+        const {comentarios} = this.state;
+        const comentariosAjustados = comentarios.map(comentarioNoEstado => {
+            if (comentarioNoEstado.id === comentarioAlterado.id) {
+                return comentarioAlterado;
+            } else {
+                return comentarioNoEstado;
+            }
+        });        
+        this.setState({comentarios: comentariosAjustados})
+    }
     render() {
-        const {postagem, selecionarPostagem, 
-            removerPostagem, selecionarParaEditarPostagem,
-            aoCriarComentario, votar} = this.props;
-        const {divCriarComentario, body, author} = this.state;
-        let data = null;
-        if(postagem){
-            data = converterTimestamp(postagem.timestamp);
-        }
+        const {postagem, comentarios, divCriarComentario} = this.state;
         return (<div>
-            {postagem ?
-            <Jumbotron>                
-                <h1 className="display-6">{postagem.title}</h1>
-                <p className="lead">{postagem.body}</p>
-                <hr className="my-2" />
-                <p className="lead">{data} - Author: {postagem.author}</p>                
-                {selecionarPostagem &&    
-                    <p>
-                        <Button onClick={() => selecionarPostagem(postagem)}>Detalhes da Postagem</Button>                         
-                    </p>              
-                }
-                <p>
-                    <Button>Comentários {postagem.commentCount}</Button>&nbsp;
-                    <Button>#{postagem.category}</Button>     
-                </p>
-                <p>
-                    Score: {postagem.voteScore}&nbsp;
-                    <Button color='success' onClick={() => {votar(postagem.id,'posts','upVote')}}>Plus</Button>&nbsp;
-                    <Button color='danger' onClick={() => {votar(postagem.id,'posts','downVote')}}>Minus</Button>         
-                </p>
-                {removerPostagem &&  
-                    <div>
-                        <p>        
-                            <Button onClick={() => {removerPostagem()}} color='danger'>Remover Postagem</Button>         
-                        </p>
-                    </div>                    
-                }
-                {selecionarParaEditarPostagem &&  
-                    <div>
-                        <p>        
-                            <Button onClick={() => {selecionarParaEditarPostagem()}} >Editar Postagem</Button>         
-                        </p>
-                    </div>                    
-                }
-                {aoCriarComentario &&
+                    <Alert color="primary">
+                        Detalhe Postagem               
+                        <Link to='/'>
+                            <Button size="sm" style={{float: 'right'}} color="default">
+                                Voltar ao Mural
+                            </Button>                
+                        </Link>    
+                    </Alert> 
+                    {postagem && <Postagem postagem={postagem} />}
                     <div>
                          <p>        
                              <Button onClick={() => this.mostrarDivParaCriarComentario()} color='info' >Novo Cometario</Button>         
                          </p>
-                    </div>    
-                }
-                {divCriarComentario &&
-                    <div>
-                        <form onSubmit={this.auxiliarDeSubmiti}>
-                            <p>Criar Comentario</p> 
-                            <p>Autor</p>
-                            <p>
-                                <input 
-                                    value={author}
-                                    type='text' 
-                                    name='author'
-                                    placeholder='Autor'                            
-                                    onChange={(event) => {
-                                        this.atualizarCampoAutor(event.target.value)
-                                    }} 
-                                />
-                            </p>
-                            <p>Corpo</p>
-                            <p>
-                                <input 
-                                    value={body}
-                                    type='text' 
-                                    name='body'
-                                    placeholder='Corpo'                            
-                                    onChange={(event) => {
-                                        this.atualizarCampoCorpo(event.target.value)
-                                    }} 
-                                />
-                            </p>
-                            <p><Button>Criar</Button></p>
-                        </form>
                     </div>
-                }
-            </Jumbotron> : <Alert color="danger">Postagem Apagada</Alert>}        
-        </div>);
+                    {divCriarComentario && 
+                        <SalvarComentario 
+                            aoCriarComentario={(comentario)=>{this.aoCriarComentario(comentario)}}
+                        />}
+                    {comentarios && comentarios
+                        .filter(comentario => (comentario.deleted === false))
+                        .sort((a, b) => (a.voteScore < b.voteScore))
+                        .map(comentario => (<Comentario 
+                                                key={comentario.id} 
+                                                comentario={comentario}
+                                                removerComentario={comentario=>this.removerComentario(comentario)}
+                                                aoAlterarComentario={comentario=>this.aoAlterarComentario(comentario)}
+                                            />))}
+                </div>);
     }
 
 }
 
-export default DetalhePostagem;
+function mapDispatchToProps(dispatch) {
+    return {
+        alterarPostagem: (data) => dispatch(alterarPostagem(data)),
+    };
+}
+
+export default connect(null, mapDispatchToProps)(DetalhePostagem);

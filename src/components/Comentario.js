@@ -2,15 +2,17 @@ import React, { Component } from 'react';
 import {Jumbotron, Button} from 'reactstrap';
 import {converterTimestamp} from '../utils/helper';
 import serializeForm from 'form-serialize';
+import * as ReadableApi from '../utils/ReadableApi';
 
 class Comentario extends Component {
     state = {
+        comentario: null,
         divAlterarComentario: false,
         body: '',
     }  
     componentDidMount() {
         const {comentario} = this.props;
-        this.setState({body: comentario.body});
+        this.setState({body: comentario.body, comentario});
     }
     mostrarDivParaAlterarComentario(){
         this.setState({divAlterarComentario: true});
@@ -30,22 +32,34 @@ class Comentario extends Component {
     }    
     esconderDivParaAlterarComentario(){
         this.setState({divAlterarComentario: false});
+    }    
+    votar(valor) { 
+        const {comentario} = this.state;        
+        if(valor === 'upVote'){
+            comentario.voteScore++;
+        }else{
+            comentario.voteScore--;
+        } 
+        this.setState({comentario});
+        ReadableApi.votar(comentario.id, 'comments', valor);                       
     }
     render() {
-        const {divAlterarComentario, body} = this.state;
-        const {comentario, removerComentario,
-        aoAlterarComentario, votar} = this.props;
-        const data = converterTimestamp(comentario.timestamp);
+        const {divAlterarComentario, body, comentario} = this.state;
+        const {removerComentario, aoAlterarComentario} = this.props;
+        let data = null;
+        if(comentario){
+            data = converterTimestamp(comentario.timestamp);
+        }
         return (<div>
-            <Jumbotron>
+            {comentario && <Jumbotron>
                 <h3>Comentário</h3>
                 <p className="lead">{comentario.body}</p>
                 <hr className="my-2" />
                 <p className="lead">{data} - Author: {comentario.author}</p> 
                 <p>
                     Score: {comentario.voteScore}&nbsp;
-                    <Button color='success' onClick={() => {votar(comentario.id,'comments','upVote')}}>Plus</Button>&nbsp;
-                    <Button color='danger' onClick={() => {votar(comentario.id,'comments','downVote')}}>Minus</Button>       
+                    <Button color='success' onClick={() => {this.votar('upVote')}}>Plus</Button>&nbsp;
+                    <Button color='danger' onClick={() => {this.votar('downVote')}}>Minus</Button>       
                 </p>  
                 {removerComentario &&
                     <div>
@@ -81,14 +95,9 @@ class Comentario extends Component {
                         </form>
                     </div>    
                 }
-            </Jumbotron>        
+            </Jumbotron>}       
         </div>);
     }
-    converterTimestamp(valor) {
-        const data = new Date(valor);
-        return `${data.getDate()}/${data.getMonth()}/${data.getFullYear()}-${data.getHours()}:${data.getMinutes()}:${data.getSeconds()}`;
-    }
-
 }
 
 

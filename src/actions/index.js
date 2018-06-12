@@ -2,7 +2,6 @@ import * as ReadableApi from '../utils/ReadableApi';
 
 export const PEGAR_CATEGORIAS_INICIAIS = 'PEGAR_CATEGORIAS_INICIAIS';
 export const PEGAR_POSTAGENS_INICIAIS = 'PEGAR_POSTAGENS_INICIAIS';
-export const SELECIONAR_POSTAGEM = 'SELECIONAR_POSTAGEM';
 export const REMOVER_POSTAGEM = 'REMOVER_POSTAGEM';
 export const ADICIONAR_POSTAGEM = 'ADICIONAR_POSTAGEM';
 export const ALTERAR_POSTAGEM = 'ALTERAR_POSTAGEM';
@@ -30,13 +29,6 @@ export const buscarPostagens = () => dispatch => (
     ReadableApi.getPostagens()
         .then(postagensNaAPI => dispatch(pegarPostagensIniciais(postagensNaAPI)))
 );
-
-export function selecionarPostagem(postagem) {
-    return {
-        type: SELECIONAR_POSTAGEM,
-        postagem
-    }
-}
 
 export function removerPostagem(postagem) {
     return {

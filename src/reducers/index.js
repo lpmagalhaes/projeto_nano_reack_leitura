@@ -1,37 +1,27 @@
 import {
-PEGAR_CATEGORIAS_INICIAIS,
+        PEGAR_CATEGORIAS_INICIAIS,
         PEGAR_POSTAGENS_INICIAIS,
-        SELECIONAR_POSTAGEM,
         REMOVER_POSTAGEM,
         ADICIONAR_POSTAGEM,
         ALTERAR_POSTAGEM
-} from '../actions';
+        } from '../actions';
+import {combineReducers} from 'redux';
 
-const estadoInicial = {
-    categorias: [],
-    postagens: [],
-};
-
-function mural(state = estadoInicial, action) {
+function categorias(state = [], action) {
     switch (action.type) {
         case PEGAR_CATEGORIAS_INICIAIS:
-            return {
-                ...state,
-                categorias: action.categorias
-            };
+            return [...state, ...action.categorias];
+        default:
+            return state;
+    }
+}
+
+function postagens(state = [], action) {
+    switch (action.type) {
         case PEGAR_POSTAGENS_INICIAIS:
-            return {
-                ...state,
-                postagens: action.postagens
-            };
-        case SELECIONAR_POSTAGEM:
-            return {
-                ...state,
-                postagemSelecionada: action.postagem
-            };
+            return [...state, ...action.postagens];        
         case REMOVER_POSTAGEM:
-            const estadoAtualizadoRemovendo = state;
-            estadoAtualizadoRemovendo.postagens = estadoAtualizadoRemovendo.postagens.map(
+            const estadoAtualizadoRemovendo = state.map(
                     postagem => {
                         if (postagem.id === action.postagem.id) {
                             postagem.deleted = true
@@ -40,12 +30,9 @@ function mural(state = estadoInicial, action) {
                     });
             return estadoAtualizadoRemovendo;
         case ADICIONAR_POSTAGEM:
-            const estadoAtualizadoPostagem = state;
-            estadoAtualizadoPostagem.postagens.push(...action.postagem);
-            return estadoAtualizadoPostagem;
-        case ALTERAR_POSTAGEM:
-            const estadoAtualizadoAlterarPostagem = state;
-            estadoAtualizadoAlterarPostagem.postagens = estadoAtualizadoAlterarPostagem.postagens.map(
+            return [...state, action.postagem];
+        case ALTERAR_POSTAGEM:           
+            const estadoAtualizadoAlterarPostagem = state.map(
                     postagemNoEstado => {
                         if (postagemNoEstado.id === action.postagem.id) {
                             return action.postagem;
@@ -53,10 +40,13 @@ function mural(state = estadoInicial, action) {
                             return postagemNoEstado;
                         }
                     });
-            return estadoAtualizadoAlterarPostagem;
+            return [...estadoAtualizadoAlterarPostagem];
         default:
             return state;
     }
 }
 
-export default mural;
+export default combineReducers({
+    categorias,
+    postagens,
+});
