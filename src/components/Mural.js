@@ -18,9 +18,8 @@ class Mural extends Component {
     }
     componentDidMount(){
         const {categoriaSelecionada} = this.state;
-        const {location} = this.props;
-        if(categoriaSelecionada === null && location.pathname.split('/')[1]){
-            const categoriaUrl = location.pathname.split('/')[1];
+        const categoriaUrl = this.props.match.params.category;
+        if(categoriaSelecionada === null && categoriaUrl){        
             this.selecionarCategoria(categoriaUrl);
         }
     }
@@ -75,7 +74,7 @@ class Mural extends Component {
                             (
                             <Postagem 
                                 key={postagem.id} 
-                                postagem={postagem}                                        
+                                id={postagem.id}                                        
                                 />
                             )
                         )

@@ -3,7 +3,8 @@ import {buscarPostagens, buscarCategorias} from '../actions';
 import Mural from './Mural';
 import DetalhePostagem from './DetalhePostagem';
 import SalvarPostagem from './SalvarPostagem';
-import {Route, withRouter} from 'react-router-dom';
+import Pagina404 from './Pagina404';
+import {Route, withRouter, Switch} from 'react-router-dom';
 import {connect} from 'react-redux';
 
 class App extends Component {    
@@ -14,10 +15,13 @@ class App extends Component {
     }    
     render() {        
         return (<div className="content container">
-                    <Route exact path='/' component={Mural} />
-                    <Route exact path={`/:category`} component={Mural} />
-                    <Route exact path={`/:category/:id`} component={DetalhePostagem} />                            
-                    <Route path='/nova/postagem/0' component={SalvarPostagem} />
+                    <Switch>
+                        <Route exact path='/' component={Mural} />
+                        <Route exact path={`/:category`} component={Mural} />
+                        <Route exact path={`/:category/:id`} component={DetalhePostagem} />                            
+                        <Route path='/nova/postagem' component={SalvarPostagem} />
+                        <Route component={Pagina404} />
+                    </Switch>        
                 </div>);
     }
 }

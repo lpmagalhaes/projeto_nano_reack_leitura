@@ -19,7 +19,7 @@ class SalvarPostagem extends Component {
         } else {
             this.setState({mostrarMensagemDeErro: false});
         }
-        valores.id = Date.now();
+        valores.id = Date.now().toString();
         valores.timestamp = Date.now();
         valores.voteScore = 1;
         valores.deleted = false;

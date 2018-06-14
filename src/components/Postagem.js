@@ -1,52 +1,50 @@
 import React, { Component } from 'react';
-import {Jumbotron, Button, Alert} from 'reactstrap';
+import {Jumbotron, Button} from 'reactstrap';
 import {converterTimestamp} from '../utils/helper';
 import {Link} from 'react-router-dom';
-import {inativarPostagem, alterarPostagem} from '../actions';
+import {inativarPostagem, alterarPostagem, atualizarPostagem} from '../actions';
 import {connect} from 'react-redux';
 import EditarPostagem from './EditarPostagem';
 import * as ReadableApi from '../utils/ReadableApi';
 
 class Postagem extends Component {
     state = {
-        postagem: null,
         divAlterarPostagem: false,
-    }
-    componentDidMount() {
-        this.setState({postagem: this.props.postagem});
     }
     selecionarParaEditarPostagem() {
         this.setState({divAlterarPostagem: true});
     }
     aoAlterarPostagem(postagemAlterada) {
         this.props.alterarPostagem(postagemAlterada)
-                .then(() => {
-                    this.setState({divAlterarPostagem: false});
-                });
+            .then(this.setState({divAlterarPostagem: false}));
     }
     aoInativarPostagem(postagem) {
         this.props.inativarPostagem(postagem);
-        postagem.deleted = true;
-        this.setState({postagem: postagem});
     }
-    votar(valor) { 
-        const {postagem} = this.state;        
+    votar(valor, postagem) {           
         if(valor === 'upVote'){
             postagem.voteScore++;
         }else{
             postagem.voteScore--;
         }        
-        this.setState({postagem: postagem});
-        ReadableApi.votar(postagem.id, 'posts', valor);                       
+        ReadableApi.votar(postagem.id, 'posts', valor)
+            .then(this.props.atualizarPostagem(postagem));                                
     }
     render() {
-        const {postagem, divAlterarPostagem} = this.state;
+        const {divAlterarPostagem} = this.state;
+        let postagem = null;
+        const id = this.props.id;        
+        this.props.postagens.map(postagemNaStore => {
+            if(postagemNaStore.id.toString() === id.toString()){
+               postagem = postagemNaStore;
+            }
+        });   
         let data = null;
         if (postagem) {
             data = converterTimestamp(postagem.timestamp);
-        }
+        }        
         return (<div>
-                    {postagem && postagem.deleted === false ?
+                    {postagem &&
                         <Jumbotron>                
                             <h1 className="display-6">{postagem.title}</h1>
                             <p className="lead">{postagem.body}</p>
@@ -63,8 +61,8 @@ class Postagem extends Component {
                             </div>
                              <p>
                                 Score: {postagem.voteScore}&nbsp;
-                                <Button color='success' onClick={() => {this.votar('upVote')}}>Plus</Button>&nbsp;
-                                <Button color='danger' onClick={() => {this.votar('downVote')}}>Minus</Button>         
+                                <Button color='success' onClick={() => {this.votar('upVote', postagem)}}>Plus</Button>&nbsp;
+                                <Button color='danger' onClick={() => {this.votar('downVote', postagem)}}>Minus</Button>         
                             </p>
                             <div>
                                 <p>        
@@ -84,17 +82,22 @@ class Postagem extends Component {
                                 </div>
                             }
 
-                        </Jumbotron> : <Alert color="danger">Postagem Apagada</Alert>}        
+                        </Jumbotron>}        
         </div>);
     }
 
+}
+
+function mapStateToProps({postagens}) {
+    return {postagens};
 }
 
 function mapDispatchToProps(dispatch) {
     return {
         inativarPostagem: (data) => dispatch(inativarPostagem(data)),
         alterarPostagem: (data) => dispatch(alterarPostagem(data)),
+        atualizarPostagem: (data) => dispatch(atualizarPostagem(data)),
     };
 }
 
-export default connect(null, mapDispatchToProps)(Postagem);
+export default connect(mapStateToProps, mapDispatchToProps)(Postagem);

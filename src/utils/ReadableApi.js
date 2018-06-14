@@ -19,8 +19,8 @@ export const getPostagens = () =>
     fetch(`${api}/posts`, {headers})
             .then(res => res.json())
 
-export const getComentariosDaPostagem = (idPostagem) =>
-    fetch(`${api}/posts/${idPostagem}/comments`, {headers})
+export const getComentariosDaPostagem = (postagem) =>
+    fetch(`${api}/posts/${postagem.id}/comments`, {headers})
             .then(res => res.json())
 
 export const postPostagem = (postagem) =>
