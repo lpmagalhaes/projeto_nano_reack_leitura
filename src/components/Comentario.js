@@ -12,12 +12,9 @@ class Comentario extends Component {
         divAlterarComentario: false,
         body: '',
     }  
-    componentDidMount() {      
-        this.props.comentarios.map(comentario => {
-                if(comentario.id === this.props.id){
-                    this.setState({body: comentario.body});
-                }
-        });       
+    componentDidMount() { 
+        const {comentario} = this.props; 
+        this.setState({body: comentario.body});           
     }
     mostrarDivParaAlterarComentario(){
         this.setState({divAlterarComentario: true});
@@ -28,13 +25,7 @@ class Comentario extends Component {
     auxiliarDeSubmiti = (evento) => {
         evento.preventDefault();
         const valores = serializeForm(evento.target, {hash: true});      
-        let comentario = null;
-        const id = this.props.id;        
-        this.props.comentarios.map(comentarioNaStore => {
-            if(comentarioNaStore.id.toString() === id.toString()){
-               comentario = comentarioNaStore;
-            }
-        });       
+        let {comentario} = this.props;
         comentario.body = valores.body;
         this.props.alterarComentario(comentario);
         this.esconderDivParaAlterarComentario();       
@@ -43,14 +34,10 @@ class Comentario extends Component {
         this.setState({divAlterarComentario: false});
     } 
     removerComentario(comentario) {
-        const {inativarComentario, alterarPostagem} = this.props;
-        this.props.postagens.map(postagem => {
-            if(postagem.id.toString() === comentario.parentId.toString()){
-                postagem.commentCount--;
-                inativarComentario(comentario)
-                    .then(alterarPostagem(postagem)); 
-            }
-        });
+        const {inativarComentario, alterarPostagem, postagem} = this.props;        
+        postagem.commentCount--;
+        inativarComentario(comentario)
+            .then(alterarPostagem(postagem));             
     }   
     votar(valor, comentario) {
         if(valor === 'upVote'){
@@ -63,24 +50,14 @@ class Comentario extends Component {
             .then(this.props.atualizarComentario(comentario));            
     }
     render() {
-        let comentario = null;
-        const id = this.props.id;        
-        this.props.comentarios.map(comentarioNaStore => {
-            if(comentarioNaStore.id.toString() === id.toString()){
-               comentario = comentarioNaStore;
-            }
-        });
+        const {comentario} = this.props;
         const {divAlterarComentario, body} = this.state;
-        let data = null;
-        if(comentario){
-            data = converterTimestamp(comentario.timestamp);
-        }
         return (<div>
             {comentario && <Jumbotron>
                 <h3>Comentário</h3>
                 <p className="lead">{comentario.body}</p>
                 <hr className="my-2" />
-                <p className="lead">{data} - Author: {comentario.author}</p> 
+                <p className="lead">{converterTimestamp(comentario.timestamp)} - Author: {comentario.author}</p> 
                 <p>
                     Score: {comentario.voteScore}&nbsp;
                     <Button color='success' onClick={() => {this.votar('upVote', comentario)}}>Plus</Button>&nbsp;
@@ -123,10 +100,13 @@ class Comentario extends Component {
     }
 }
 
-function mapStateToProps({postagens, comentarios}) {
-    return {postagens, comentarios};
+function mapStateToProps({postagens, comentarios}, {id}) {
+    const comentarioSelecionado = comentarios && comentarios.find(comentario => comentario.id === id);
+    return {
+        postagem: postagens && postagens.find(postagem => postagem.id === comentarioSelecionado.parentId),
+        comentario: comentarioSelecionado,
+        };
 }
-
 function mapDispatchToProps(dispatch) {
     return {
         inativarComentario: (data) => dispatch(inativarComentario(data)),

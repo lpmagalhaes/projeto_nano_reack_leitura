@@ -31,16 +31,11 @@ class Mural extends Component {
     }    
     render() {
         const {categoriaSelecionada, ordenacao} = this.state;
-        const {postagens} = this.props;
+        let {postagemParaMostrar} = this.props;
         const corDefault = 'default';
         const corSuccess = 'success';
         const ordenacaoVotos = 'votos';
         const ordenacaoData = 'data';
-        let postagemParaMostrar = postagens;
-        if (categoriaSelecionada) {
-            postagemParaMostrar = postagemParaMostrar
-                    .filter(postagem => (postagem.category === categoriaSelecionada));
-        }
         let corBotaoOrdenacaoVotos = corDefault;
         if (ordenacao === ordenacaoVotos) {
             corBotaoOrdenacaoVotos = corSuccess;
@@ -84,9 +79,7 @@ class Mural extends Component {
 
 }
 
-function mapStateToProps({categorias, postagens}) {
-    return {categorias, postagens};
-}
+const mapStateToProps = ({postagens},{match}) => ({postagemParaMostrar: match.params.category ? postagens.filter(postagem => postagem.category === match.params.category) : postagens});
 
 function mapDispatchToProps(dispatch) {
     return {

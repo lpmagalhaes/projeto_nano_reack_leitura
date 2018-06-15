@@ -32,24 +32,14 @@ class Postagem extends Component {
     }
     render() {
         const {divAlterarPostagem} = this.state;
-        let postagem = null;
-        const id = this.props.id;        
-        this.props.postagens.map(postagemNaStore => {
-            if(postagemNaStore.id.toString() === id.toString()){
-               postagem = postagemNaStore;
-            }
-        });   
-        let data = null;
-        if (postagem) {
-            data = converterTimestamp(postagem.timestamp);
-        }        
+        const {postagem} = this.props;
         return (<div>
                     {postagem &&
                         <Jumbotron>                
                             <h1 className="display-6">{postagem.title}</h1>
                             <p className="lead">{postagem.body}</p>
                             <hr className="my-2" />
-                            <p className="lead">{data} - Author: {postagem.author}</p>
+                            <p className="lead">{converterTimestamp(postagem.timestamp)} - Author: {postagem.author}</p>
                             <p>
                                 <Link to={`/${postagem.category}/${postagem.id}`}>
                                 <Button>Detalhes da Postagem</Button>
@@ -88,9 +78,7 @@ class Postagem extends Component {
 
 }
 
-function mapStateToProps({postagens}) {
-    return {postagens};
-}
+const mapStateToProps = ({postagens}, {id}) => ({postagem: postagens && postagens.find(postagem => postagem.id === id)});
 
 function mapDispatchToProps(dispatch) {
     return {
