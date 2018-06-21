@@ -16,10 +16,10 @@ class App extends Component {
     render() {        
         return (<div className="content container">
                     <Switch>
-                        <Route exact path='/' component={Mural} />
-                        <Route exact path={`/:category`} component={Mural} />
-                        <Route exact path={`/:category/:id`} component={DetalhePostagem} />                            
+                        <Route exact path='/' component={Mural} />                                                   
                         <Route path='/nova/postagem' component={SalvarPostagem} />
+                        <Route exact path={`/:category`} component={Mural} />
+                        <Route exact path={`/:category/:id`} component={DetalhePostagem} /> 
                         <Route component={Pagina404} />
                     </Switch>        
                 </div>);

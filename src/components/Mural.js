@@ -49,7 +49,7 @@ class Mural extends Component {
         return (<div>
                 <Alert color="primary">
                     Mural               
-                    <Link to='/nova/postagem/0'>
+                    <Link to='/nova/postagem'>
                         <Button size="sm" style={{float: 'right'}} color="success">
                             Adicionar Postagem
                         </Button>                
